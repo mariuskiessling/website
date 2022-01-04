@@ -1,0 +1,89 @@
+# We will continuously release a new image as soon as a commit hits the main
+# branch or is manually dispatched. The image tags follow a date-based
+# versioning scheme (YYYYMMDDHHMM). This allows for multiple builds on the same
+# day with the same commit hash which is especially useful for the
+# automatically updated age displayed on the website. QA actions are maintained
+# in their own workflow file.
+
+name: Release
+
+on:
+  schedule:
+    # My current age is displayed on the website which should be updated
+    # automatically on my birthday.
+    - cron: '0 0 9 1 *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge with sigstore/fulcio
+      # for the key-less signature of the image.
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@1e95c1de343b5b0c23352d6417ee3e48d5bcd422
+        with:
+          cosign-release: 'v1.4.0'
+
+      # Workaround: https://github.com/docker/build-push-action/issues/461
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+        
+      - name: Log into registry
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Construct version
+        id: version
+        run: echo "::set-output name=version::$(date +'%Y%m%d%H%M')"
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ steps.version.outputs.version }}
+          labels: |
+            org.opencontainers.image.authors=Marius Kießling <vcs@mariuskiessling.de>
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.title=Marius Kießling's personal website
+            org.opencontainers.image.description=The personal website of Marius Kießling.
+
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # We will use cosign's key-less signatures based on Fulcia CA as this is
+      # a public project and there is no need to fix the attestation to a
+      # specific key.
+      - name: Sign the published Docker image
+        env:
+          # As the key-less signatures are still considered experimental, we
+          # have to set this key.
+          COSIGN_EXPERIMENTAL: "true"
+        run: cosign sign ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}
