@@ -1,0 +1,8 @@
+baseURL = 'https://mariuskiessling.de/'
+languageCode = 'en-us'
+title = 'Marius Kießling'
+theme = 'mk'
+[taxonomies]
+
+[outputs]
+  home = ["HTML"]

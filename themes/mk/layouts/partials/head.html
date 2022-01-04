@@ -1,0 +1,20 @@
+<head>
+    <meta charset="utf-8">
+    <title>Marius Kießling</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    {{ $mainCSS := resources.Get "/main.scss" }}
+    {{ $grdCSS := resources.GetRemote "https://raw.githubusercontent.com/1000ch/grd/e1413581f671d28a86b411f2d04c6ac2646c3659/src/grd.css" }}
+    {{ $mainCSS := $mainCSS | resources.ToCSS }}
+    {{ $css := slice $mainCSS $grdCSS | resources.Concat "css/styles.css" | minify | fingerprint}}
+
+
+    <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+    <!--<link rel="stylesheet" href="/css/grd.css">-->
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,900" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Anonymous+Pro" rel="stylesheet">
+</head>

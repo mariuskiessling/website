@@ -1,0 +1,12 @@
+{{ define "main" }}
+
+<div class="Cell -12of12">
+    <h1>{{ $.Title }}</h1>
+    {{ if .Param "description" }}
+    <p id="site-description">{{ .Param "description" }}</p>
+    {{ end }}
+</div>
+
+{{ .Content }}
+
+{{ end }}

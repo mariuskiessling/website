@@ -1,0 +1,12 @@
+name = "MK"
+license = "MIT"
+licenselink = "https://github.com/mariuskiessling/website/blob/main/themes/mk/LICENSE"
+description = "The Hugo theme for my personal website."
+homepage = "https://mariuskiessling.de"
+tags = []
+features = []
+min_version = "0.41.0"
+
+[author]
+  name = "Marius Kießling"
+  homepage = "https://mariuskiessling.de"
