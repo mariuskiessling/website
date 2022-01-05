@@ -30,6 +30,8 @@ jobs:
       # This is used to complete the identity challenge with sigstore/fulcio
       # for the key-less signature of the image.
       id-token: write
+    outputs:
+      image-version: ${{ steps.version.outputs.version }}
 
     steps:
       - name: Checkout repository
@@ -63,11 +65,18 @@ jobs:
           tags: |
             type=raw,value=latest
             type=raw,value=${{ steps.version.outputs.version }}
+          # The documentation and vendor labels are required to overwrite the
+          # labels of the Caddy base image. Let's also be a nice citizen of the
+          # ecosystem and set the base image labels.
           labels: |
             org.opencontainers.image.authors=Marius Kießling <vcs@mariuskiessling.de>
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
             org.opencontainers.image.title=Marius Kießling's personal website
             org.opencontainers.image.description=The personal website of Marius Kießling.
+            org.opencontainers.image.documentation=https://github.com/mariuskiessling/website
+            org.opencontainers.image.vendor=Marius Kießling
+            org.opencontainers.image.base.digest=sha256:b47a92735f1a101ce7087f2fc6f8b33614226b32c4507de0de8a4b6b34d84504
+            org.opencontainers.image.base.name=registry.hub.docker.com/library/caddy:2.4.6
 
       - name: Build and push Docker image
         id: build-and-push
@@ -87,3 +96,45 @@ jobs:
           # have to set this key.
           COSIGN_EXPERIMENTAL: "true"
         run: cosign sign ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}
+
+  rollout:
+    runs-on: ubuntu-latest
+    needs: release
+
+    steps:
+      - name: Checkout k8s-clusters repository
+        uses: actions/checkout@v2
+        with:
+          repository: mariuskiessling/k8s-clusters
+          ssh-key: '${{ secrets.K8S_CLUSTERS_DEPLOY_KEY }}'
+
+      - name: Set up Git
+        run: |
+          git config user.name "Website CI Bot"
+          git config user.email "<>"
+
+      - name: Install kustomize
+        run: |
+          mkdir -p $HOME/.kustomize
+          cd $HOME/.kustomize
+
+          expected_digest='2d5927efec40ba32a121c49f6df9955b8b8a296ef1dec4515a46fc84df158798'
+          curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.4.1/kustomize_v4.4.1_linux_amd64.tar.gz -o kustomize.tar.gz
+          sha=$(sha256sum kustomize.tar.gz | cut -d' ' -f1);
+          if [[ $sha != "${expected_digest}" ]]; then exit 1; fi
+          tar xfz kustomize.tar.gz
+          chmod +x kustomize
+
+          echo "$HOME/.kustomize" >> $GITHUB_PATH
+
+
+      - name: Update image in kustomization
+        run: |
+          cd apps/nbg1/personal-website
+          kustomize edit set image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.release.outputs.image-version }}
+
+      - name: Commit and push updated image tag
+        run: |
+          git add apps/nbg1/personal-website/kustomization.yaml
+          git commit -m "Update website image to version ${{ needs.release.outputs.image-version }}"
+          git push origin main
