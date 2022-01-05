@@ -19,10 +19,10 @@ Benedikt-Schmittmann-Str. 5
 ### Kontakt
 
 Telefon:  
-0174 399 73 12
+0211 15 835 623
 
 Fax:  
-0123494 4
+0211 15 868 110
 
 E-Mail:  
 privat@mariuskiessling.de
@@ -87,11 +87,11 @@ Benedikt-Schmittmann-Str. 5
 
 ### Contact
 
-Telefon:  
-0174 399 73 12
+Phone:  
+0211 15 835 623
 
 Fax:  
-0123494 4
+0211 15 868 110
 
 E-Mail:  
 privat@mariuskiessling.de
