@@ -427,6 +427,13 @@ footer {
             display: block;
         }
     }
+
+    .default-page {
+        .Cell {
+            width: 100% !important;
+            padding: 0 0 20px 0 !important;
+        }
+    }
 }
 
 @media (max-width: 530px) {
