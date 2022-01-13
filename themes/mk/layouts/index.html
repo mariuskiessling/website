@@ -24,7 +24,12 @@
                 <img src="/img/portrait.png" id="mini-portrait" alt="Portrait" width="250px">
 
                 <p>
-                I'm Marius Kießling, a {{ (now.AddDate -1998 -1 -9).Year }}-year-old developer from Dortmund, Germany, now living in Düsseldorf. I currently work for METRO.digital as a <strong>Cloud Engineer</strong>. I am also <strong>responsible for the open source program</strong> of METRO.digital. I <strong>studied applied computer science</strong> while working for Hewlett Packard Enterprise. After that, I joined METRO|NOM where I <strong>built and operated their in-house Kubernetes stack</strong>. My <a href="https://www.linkedin.com/in/mariuskiessling/">LinkedIn profile</a> has a more in-depth resume in case you are interested.
+                {{ $birthday := time "1998-01-09" }}
+                {{ $age := sub now.Year $birthday.Year }}
+                {{ if lt now.YearDay $birthday.YearDay }}
+                    {{ $age = sub $age 1 }}
+               {{ end }}
+                I'm Marius Kießling, a {{ $age }}-year-old developer from Dortmund, Germany, now living in Düsseldorf. I currently work for METRO.digital as a <strong>Cloud Engineer</strong>. I am also <strong>responsible for the open source program</strong> of METRO.digital. I <strong>studied applied computer science</strong> while working for Hewlett Packard Enterprise. After that, I joined METRO|NOM where I <strong>built and operated their in-house Kubernetes stack</strong>. My <a href="https://www.linkedin.com/in/mariuskiessling/">LinkedIn profile</a> has a more in-depth resume in case you are interested.
                 </p>
                 <p>
                     If you want to find out more about my personal work, check out the projects section.
