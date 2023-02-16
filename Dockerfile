@@ -1,4 +1,4 @@
-FROM klakegg/hugo:0.91.2-ext-alpine-ci as builder
+FROM klakegg/hugo:0.107.0-ext-alpine-ci as builder
 COPY . /src
 RUN hugo --minify
 
