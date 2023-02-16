@@ -78,8 +78,8 @@ jobs:
             org.opencontainers.image.description=The personal website of Marius Kießling.
             org.opencontainers.image.documentation=https://github.com/mariuskiessling/website
             org.opencontainers.image.vendor=Marius Kießling
-            org.opencontainers.image.base.digest=sha256:b47a92735f1a101ce7087f2fc6f8b33614226b32c4507de0de8a4b6b34d84504
-            org.opencontainers.image.base.name=registry.hub.docker.com/library/caddy:2.4.6
+            org.opencontainers.image.base.digest=sha256:86182e6d30691dc14ff37ef4e33e0d953a04d05d4afbd2989d2f8ec62ae94e06
+            org.opencontainers.image.base.name=registry.hub.docker.com/library/caddy:2.6.4
 
       - name: Build and push Docker image
         id: build-and-push
