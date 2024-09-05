@@ -43,8 +43,6 @@ jobs:
 
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
-        with:
-          cosign-release: 'v1.13.1'
 
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@v2
@@ -95,10 +93,14 @@ jobs:
       # specific key.
       - name: Sign the published Docker image
         env:
-          # As the key-less signatures are still considered experimental, we
-          # have to set this key.
-          COSIGN_EXPERIMENTAL: "true"
-        run: cosign sign ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          images=""
+          for tag in ${TAGS}; do
+            images+="${tag}@${DIGEST} "
+          done
+          cosign sign --yes ${images}
 
   rollout:
     name: Roll out release
