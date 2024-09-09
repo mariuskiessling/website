@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
@@ -109,7 +109,7 @@ jobs:
 
     steps:
       - name: Check out k8s-clusters repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: mariuskiessling/k8s-clusters
           ssh-key: '${{ secrets.K8S_CLUSTERS_DEPLOY_KEY }}'
